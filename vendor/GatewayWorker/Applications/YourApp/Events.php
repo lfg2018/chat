@@ -67,12 +67,21 @@ class Events
                }else{
                    $date['isread'] = 0;
                }
-               $date['type '] = 'save';
+               $date['type'] = 'save';
                Gateway::sendToUid($fromid,json_encode($date));
                return;
            case 'bind':
                 $fromid = $message_data['fromid'];
                 Gateway::bindUid($client_id,$fromid);
+               return;
+           case 'online':
+               $toid = $message_data['toid'];
+               $fromid = $message_data['fromid'];
+               $date = [
+                   'type' => 'online',
+                   'status' => Gateway::isUidOnline($toid)
+               ];
+               Gateway::sendToUid($fromid,json_encode($date));
                return;
        }
    }
