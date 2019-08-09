@@ -26,7 +26,10 @@ class communication extends Model
         }else{
             $msg = self::whereOr($fromWhere,$toWhere)->order('id')->select();
         }
-
         return $msg;
+    }
+
+    public static function saveDate($data){
+        return self::insertGetId($data);
     }
 }

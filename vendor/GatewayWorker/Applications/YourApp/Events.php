@@ -83,6 +83,18 @@ class Events
                ];
                Gateway::sendToUid($fromid,json_encode($date));
                return;
+           case 'say_img':
+               $imgName = $message_data['data'];
+               $toid = $message_data['toid'];
+               $fromid = $message_data['fromid'];
+               $date = [
+                   'type' => 'say_img',
+                   'fromid' => $fromid,
+                   'toid' => $toid,
+                   'data' => $imgName
+               ];
+               Gateway::sendToUid($toid,json_encode($date));
+               return;
        }
    }
    

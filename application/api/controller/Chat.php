@@ -9,6 +9,7 @@ namespace app\api\controller;
 use app\index\model\communication;
 use app\index\model\user;
 use think\Controller;
+use think\facade\Env;
 
 class Chat extends Controller
 {
@@ -70,7 +71,22 @@ class Chat extends Controller
         if(!in_array($suffix,$type)) return ['status'=>'error','msg'=>'error img tye'];
         if($file['size']/1024 > 5120) return ['status'=>'error','msg'=>'img too large'];
         $filename = uniqid('chat_img_',false);
-        $uploadpath = ROOT_PATH
+        $uploadpath = Env::get('root_path').'\public\\Upload\\img\\';
+        $fileUp = $uploadpath.$filename.$suffix;
+        $ret = move_uploaded_file($file['tmp_name'],$fileUp);
+        if(!$ret) return ['status'=>'error','msg'=>'upload error'];
+        $name = '\\Upload\\\\img\\\\'.$filename.$suffix;
+        $data['content'] = $name;
+        $data['fromid'] = $fromid;
+        $data['toid'] = $toid;
+        $data['fromname'] = user::getNickName($fromid);
+        $data['toname'] = user::getNickName($toid);
+        $data['time'] = time();
+        $data['isread'] = 0;
+        $data['type'] = 2;
+        $retId = communication::saveDate($data);
+        if($retId) return ['status'=>'ok','img_name' =>$name];
+        return ['status'=>'error','msg'=>'save upload error'];
     }
 
 }

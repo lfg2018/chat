@@ -1,4 +1,4 @@
-<?php /*a:1:{s:58:"E:\wamp64\stu\chat\application\index\view\index\index.html";i:1565258375;}*/ ?>
+<?php /*a:1:{s:58:"E:\wamp64\stu\chat\application\index\view\index\index.html";i:1565340131;}*/ ?>
 <!doctype html>
 <html>
 <head>
@@ -61,17 +61,14 @@
                   ws.send(onlineJson);
                   return;
               case "text":
-                  if(toid == message.fromid){
-                      $('.chat-content').append('<div class="chat-text section-left flex">\n' +
-                          '            <span class="char-img" style="background-image: url('+to_head+')"></span>\n' +
-                          '            <span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+message.data+'</span>\n' +
-                          '            </div>');
+                  if(toid == message.fromid) {
+                      appendOtherHtml(message.data,1);
                       $(".chat-content").scrollTop(3000);
                   }
-              return;
+                  return;
               case "save":
                   save_msg(message);
-                  if(message.isready == 1){
+                  if(message.isread == 1){
                       online = 1;
                       $('.shop-online').text('在线');
                   }else{
@@ -87,19 +84,20 @@
                       online = 0;
                       $('.shop-online').text('不在线');
                   }
-
+                  return;
+              case "say_img":
+                  appendOtherHtml(message.data,2);
+                  $(".chat-content").scrollTop(3000);
+                  return;
           }
          }
 
      $(".send-btn").click(function(){
          var text = $(".send-input").val();
          var message = '{"data":"'+text+'","type":"say","fromid":"'+fromid+'","toid":"'+toid+'"}';
-         $('.chat-content').append('<div class="chat-text section-right flex">\n' +
-             '        <span class="text"><i class="icon icon-sanjiao3 t-32"></i>'+text+'</span>\n' +
-             '        <span class="char-img" style="background-image: url('+from_head+')"></span>\n' +
-             '        </div>');
-         ws.send(message);
+         appendSelfHtml(text,1);
          $(".chat-content").scrollTop(3000);
+         ws.send(message);
          $(".send-input").val("");
      })
 
@@ -127,20 +125,16 @@
             processData:false,
             contentType:false,
             success:function (data) {
-                console.log(data);
-//             if(data.status == 'ok'){
-//                 var text = data.ima_name;
-//                 $('.chat-content').append('<div class="chat-text section-right flex">\n' +
-//                     '        <span class="text"><i class="icon icon-sanjiao3 t-32"></i>'+text+'</span>\n' +
-//                     '        <span class="char-img" style="background-image: url('+from_head+')"></span>\n' +
-//                     '        </div>');
-//                 $(".chat-content").scrollTop(3000);
-//                 var message = '{"data":"'+text+'","type":"say_img","fromid":"'+fromid+'","toid":"'+toid+'"}';
-//                 $("#file").val("");
-//                 ws.send(message);
-//             }else{
-//                 console.log(data);
-//             }
+                 $('#file').val("");
+                 if(data.status == 'ok'){
+                     appendSelfHtml(data.img_name,2);
+                     $(".chat-content").scrollTop(3000);
+                     var message = '{"data":"\\'+data.img_name+'","type":"say_img","fromid":"'+fromid+'","toid":"'+toid+'"}';
+                     $("#file").val("");
+                     ws.send(message);
+                 }else{
+                     console.log(data);
+                 }
             }
         })
         
@@ -175,22 +169,34 @@
             function (e) {
                 $.each(e,function (index,content) {
                     if(fromid == content.fromid){
-                        $('.chat-content').append('<div class="chat-text section-right flex">\n' +
-                            '        <span class="text"><i class="icon icon-sanjiao3 t-32"></i>'+content.content+'</span>\n' +
-                            '        <span class="char-img" style="background-image: url('+from_head+')"></span>\n' +
-                            '        </div>');
+                        appendSelfHtml(content.content,content.type);
                     }else{
-                        $('.chat-content').append('<div class="chat-text section-left flex">\n' +
-                            '            <span class="char-img" style="background-image: url('+to_head+')"></span>\n' +
-                            '            <span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+content.content+'</span>\n' +
-                            '            </div>');
+                        appendOtherHtml(content.content,content.type);
                     }
                 })
                 $(".chat-content").scrollTop(3000);
             },"json"
-
-
     );
+    }
+
+    function appendSelfHtml(text,type) {
+        if(type == 2){
+            text = '<img width="120em"   src="'+text+'">';
+        }
+        $('.chat-content').append('<div class="chat-text section-right flex">\n' +
+            '        <span class="text"><i class="icon icon-sanjiao3 t-32"></i>'+text+'</span>\n' +
+            '        <span class="char-img" style="background-image: url('+from_head+')"></span>\n' +
+            '        </div>');
+    }
+
+    function appendOtherHtml(text,type) {
+        if(type == 2){
+            text = '<img width="120em"  src="'+text+'">';
+        }
+        $('.chat-content').append('<div class="chat-text section-left flex">\n' +
+            '            <span class="char-img" style="background-image: url('+to_head+')"></span>\n' +
+            '            <span class="text"><i class="icon icon-sanjiao4 t-32"></i>'+text+'</span>\n' +
+            '            </div>');
     }
 
 
